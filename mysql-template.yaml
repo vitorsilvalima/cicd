@@ -1,0 +1,100 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: mysqlTemplate
+  annotations:
+    description: "Description" 
+    iconClass: "icon-redis" 
+objects:
+#MySQL
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    name: cicd-gogs-mysql
+  spec:
+    capacity:
+      storage: 5Gi
+    accessModes:
+      - ReadWriteOnce
+      - ReadWriteMany
+    nfs:
+      server: 10.1.2.2
+      path: /opt/storage/cicd-gogs/mysql
+    persistentVolumeReclaimPolicy: Recycle
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: cicd-gogs-mysql
+  spec:
+    accessModes:
+      - ReadWriteOnce
+      - ReadWriteMany
+    resources:
+      requests:
+        storage: 4Gi
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Sonatype Nexus repository manager's http port
+    labels:
+      app: gogs-mysql
+    name: gogs-mysql
+  spec:
+    ports:
+    - name: web
+      port: 3306
+      protocol: TCP
+      targetPort: 3306
+    selector:
+      app: gogs-mysql
+      deploymentconfig: gogs-mysql
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: gogs-mysql
+    name: gogs-mysql
+  spec:
+    replicas: 1
+    selector:
+      app: gogs-mysql
+      deploymentconfig: gogs-mysql
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: gogs-mysql
+          deploymentconfig: gogs-mysql
+      spec:
+        volumes:
+          -
+            name: cicd-gogs-mysql
+            persistentVolumeClaim:
+              claimName: cicd-gogs-mysql
+        containers:
+        - image: openshift/mysql-55-centos7:latest
+          name: gogs
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: redhat
+            - name: MYSQL_USER
+              value: redhat
+            - name: MYSQL_PASSWORD
+              value: redhat
+            - name: MYSQL_DATABASE
+              value: gogs
+          ports:
+          - containerPort: 3306
+            protocol: TCP
+          volumeMounts:
+            -
+              name: cicd-gogs-mysql
+              mountPath: /var/lib/mysql/data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30

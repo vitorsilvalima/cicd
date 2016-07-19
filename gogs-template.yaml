@@ -1,0 +1,105 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: gogsTemplate
+  annotations:
+    description: "Description" 
+    iconClass: "icon-redis" 
+objects:
+# gogs
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    name: cicd-gogs-data
+  spec:
+    capacity:
+      storage: 5Gi
+    accessModes:
+      - ReadWriteOnce
+      - ReadWriteMany
+    nfs:
+      server: 10.1.2.2
+      path: /opt/storage/cicd-gogs/data
+    persistentVolumeReclaimPolicy: Recycle
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: cicd-gogs-data
+  spec:
+    accessModes:
+      - ReadWriteOnce
+      - ReadWriteMany
+    resources:
+      requests:
+        storage: 4Gi
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: The Gogs server's http port
+    labels:
+      app: gogs
+    name: gogs
+  spec:
+    ports:
+    - name: web
+      port: 3000
+      protocol: TCP
+      targetPort: 3000
+    selector:
+      app: gogs
+      deploymentconfig: gogs
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      description: Route for gogs's http service.
+    name: gogs
+    labels:
+      app: gogs
+  spec:
+    to:
+      kind: Service
+      name: gogs
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: gogs
+    name: gogs
+  spec:
+    replicas: 1
+    selector:
+      app: gogs
+      deploymentconfig: gogs
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          app: gogs
+          deploymentconfig: gogs
+      spec:
+        volumes:
+          -
+            name: cicd-gogs-data
+            persistentVolumeClaim:
+              claimName: cicd-gogs-data
+        containers:
+        - image: gogs/gogs:latest
+          name: gogs
+          ports:
+          - containerPort: 3000
+            protocol: TCP
+          - containerPort: 22
+            protocol: TCP
+          volumeMounts:
+            -
+              name: cicd-gogs-data
+              mountPath: /data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
