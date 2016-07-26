@@ -5,26 +5,26 @@ if [ "$(id -u)" != "0" ]; then
    exit 1
 fi
 
-sudo mkdir -p /opt/storage/cicd-gogs/data
-sudo mkdir -p /opt/storage/cicd-gogs/mysql  
-sudo mkdir -p /opt/storage/cicd-jenkins      
-sudo mkdir -p /opt/storage/cicd-nexus       
+mkdir -p /opt/storage/cicd-gogs/data
+mkdir -p /opt/storage/cicd-gogs/mysql  
+mkdir -p /opt/storage/cicd-jenkins      
+mkdir -p /opt/storage/cicd-nexus       
 
-sudo chown -R nfsnobody:nfsnobody /opt/storage/cicd-gogs/data
-sudo chmod -R 777 /opt/storage/cicd-gogs/data
+chown -R nfsnobody:nfsnobody /opt/storage/cicd-gogs/data
+chmod -R 777 /opt/storage/cicd-gogs/data
  
-sudo chown -R nfsnobody:nfsnobody /opt/storage/cicd-gogs/mysql
-sudo chmod -R 777 /opt/storage/cicd-gogs/mysql
+chown -R nfsnobody:nfsnobody /opt/storage/cicd-gogs/mysql
+chmod -R 777 /opt/storage/cicd-gogs/mysql
  
-sudo chown -R nfsnobody:nfsnobody /opt/storage/cicd-jenkins
-sudo chmod -R 777 /opt/storage/cicd-jenkins
+chown -R nfsnobody:nfsnobody /opt/storage/cicd-jenkins
+chmod -R 777 /opt/storage/cicd-jenkins
  
-sudo chown -R nfsnobody:nfsnobody /opt/storage/cicd-nexus
-sudo chmod -R 777 /opt/storage/cicd-nexus
+chown -R nfsnobody:nfsnobody /opt/storage/cicd-nexus
+chmod -R 777 /opt/storage/cicd-nexus
 
 
 
-sudo echo "/opt/storage/cicd-gogs/data    127.0.0.1(rw,sync,no_root_squash)" >> /etc/exports
-sudo echo "/opt/storage/cicd-gogs/mysql  127.0.0.1(rw,sync,no_root_squash)" >> /etc/exports
-sudo echo "/opt/storage/cicd-jenkins      127.0.0.1(rw,sync,no_root_squash)" >> /etc/exports
-sudo echo "/opt/storage/cicd-nexus        127.0.0.1(rw,sync,no_root_squash)" >> /etc/exports
+echo "/opt/storage/cicd-gogs/data    127.0.0.1(rw,sync,no_root_squash)" >> /etc/exports
+echo "/opt/storage/cicd-gogs/mysql  127.0.0.1(rw,sync,no_root_squash)" >> /etc/exports
+echo "/opt/storage/cicd-jenkins      127.0.0.1(rw,sync,no_root_squash)" >> /etc/exports
+echo "/opt/storage/cicd-nexus        127.0.0.1(rw,sync,no_root_squash)" >> /etc/exports
